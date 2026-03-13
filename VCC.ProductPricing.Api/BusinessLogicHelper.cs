@@ -1,13 +1,17 @@
 ﻿using VCC.ProductPricing.Common.Api;
+using VCC.ProductPricing.Common.Models;
 
 namespace VCC.ProductPricing.Api;
 
 public class BusinessLogicHelper : IBusinessLogicHelper
 {
-    public DiscountResponse? ApplyProductDiscount(int id, int discountPercentage)
+    public (DiscountResponse?, string) ApplyProductDiscount(int id, int discountPercentage)
     {
+        if (discountPercentage > 100) return (null, "Discount cannot be greater than 100%");
+        if (discountPercentage < 0) return (null, "Discount cannot be negative");
+
         var product = InMemoryDatabase.GetProductWithHistory(id);
-        if (product == null) return null;
+        if (product == null) return (null, string.Empty);
 
         var result = new DiscountResponse
         {
@@ -17,13 +21,16 @@ public class BusinessLogicHelper : IBusinessLogicHelper
             DiscountedPrice = product.Price * (100m - discountPercentage) / 100m
         };
 
-        return result;
+        return (result, string.Empty);
     }
 
-    public UpdatePriceResponse? UpdatePriceResponse(int id, decimal newPrice)
+    public (UpdatePriceResponse?, string) UpdatePriceResponse(int id, decimal newPrice)
     {
+        if (newPrice < 0) return (null, "New Price cannot be less than 0");
+
+
         var updatedProduct = InMemoryDatabase.UpdateProductPrice(id, newPrice);
-        if (updatedProduct == null) return null;
+        if (updatedProduct == null) return (null, string.Empty);
 
         var result = new UpdatePriceResponse
         {
@@ -33,6 +40,6 @@ public class BusinessLogicHelper : IBusinessLogicHelper
             NewPrice = updatedProduct.Price
         };
 
-        return result;
+        return (result, string.Empty);
     }
 }

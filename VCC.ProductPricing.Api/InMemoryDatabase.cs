@@ -153,4 +153,15 @@ public static class InMemoryDatabase
         return product;
     }
 
+
+    public static Product AddProduct(NewProduct product, int? customId = null)
+    {
+        var lastId = _products.OrderByDescending(p => p.Id).FirstOrDefault()?.Id ?? 0;
+
+        var productToAdd = new Product()
+            { Id = customId ?? lastId + 1, LastUpdated = DateTime.Now, Price = product.Price, Name = product.Name };
+        _products.Add(productToAdd);
+        return productToAdd;
+    }
+
 }

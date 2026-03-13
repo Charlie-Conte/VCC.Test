@@ -50,8 +50,12 @@ public class ProductsController : ControllerBase
     public ActionResult<DiscountResponse> ApplyDiscount([FromRoute] int id, [FromBody] DiscountRequest request)
     {
         var result = _businessLogicHelper.ApplyProductDiscount(id, request.DiscountPercentage);
-        if (result == null) return NotFound("Id Not Found");
-        return result;
+        if (result.Item1 == null)
+        {
+            if (!string.IsNullOrWhiteSpace(result.Item2)) return BadRequest(result.Item2);
+            return NotFound("Id Not Found");
+        }
+        return result.Item1;
     }
 
     /// <summary>
@@ -64,8 +68,12 @@ public class ProductsController : ControllerBase
     public ActionResult<UpdatePriceResponse> UpdateProductPrice([FromRoute] int id, [FromBody] UpdatePriceRequest request)
     {
         var result = _businessLogicHelper.UpdatePriceResponse(id, request.NewPrice);
-        if (result == null) return NotFound("Id Not Found");
-        return result;
+        if (result.Item1 == null)
+        {
+            if (!string.IsNullOrWhiteSpace(result.Item2)) return BadRequest(result.Item2);
+            return NotFound("Id Not Found");
+        }
+        return result.Item1;
     }
 
 }

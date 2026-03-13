@@ -2,13 +2,9 @@
 
 namespace VCC.ProductPricing.Common.Models;
 
-public class Product
+public class Product : NewProduct
 {
     public required int Id { get; init; }
-
-    public required string Name { get; set; }
-
-    public required decimal Price { get; set; }
 
     public required DateTime LastUpdated { get; set; }
 
