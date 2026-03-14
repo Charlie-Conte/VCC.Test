@@ -1,4 +1,5 @@
-﻿using VCC.ProductPricing.Common.Models;
+﻿using VCC.ProductPricing.Api.Database;
+using VCC.ProductPricing.Common.Models;
 
 namespace VCC.ProductPricing.Api.Tests;
 
@@ -11,9 +12,10 @@ public class BusinessLogicTests
     [OneTimeSetUp]
     public void Setup()
     {
-        BusinessLogicHelper = new BusinessLogicHelper();
+        var inMemoryDatabase = new InMemoryDatabase();
+        BusinessLogicHelper = new BusinessLogicHelper(inMemoryDatabase);
 
-        InMemoryDatabase.AddProduct(new NewProduct() { Name = "Test", Price = DefaultPrice }, 999);
+        inMemoryDatabase.AddProduct(new NewProduct() { Name = "Test", Price = DefaultPrice }, 999);
     }
 
     [TestCase(10, ExpectedResult = 11.25)]

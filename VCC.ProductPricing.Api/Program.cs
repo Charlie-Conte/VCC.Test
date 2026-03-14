@@ -1,3 +1,4 @@
+using VCC.ProductPricing.Api.Database;
 using VCC.ProductPricing.Common;
 using VCC.ProductPricing.Common.Json;
 
@@ -17,7 +18,9 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        builder.Services.AddSingleton<IProductDatabase, InMemoryDatabase>();
         builder.Services.AddScoped<IBusinessLogicHelper, BusinessLogicHelper>();
+
 
         builder.AddSerilog();
 

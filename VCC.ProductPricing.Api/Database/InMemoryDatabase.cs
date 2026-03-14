@@ -1,10 +1,10 @@
 ﻿using VCC.ProductPricing.Common.Models;
 
-namespace VCC.ProductPricing.Api;
+namespace VCC.ProductPricing.Api.Database;
 
-public static class InMemoryDatabase
+public class InMemoryDatabase : IProductDatabase
 {
-    private static List<Product> _products = new List<Product>
+    private List<Product> _products = new List<Product>
     {
         new Product { Id = 1, Name = "9ct Gold Diamond Engagement Ring", Price = 285.00m, LastUpdated = new DateTime(2024, 10, 14) },
         new Product { Id = 2, Name = "Victorian Silver Brooch with Cameo", Price = 74.99m, LastUpdated = new DateTime(2024, 9, 22) },
@@ -58,7 +58,7 @@ public static class InMemoryDatabase
         new Product { Id = 50, Name = "Victorian Gold & Enamel Mourning Brooch", Price = 195.00m, LastUpdated = new DateTime(2024, 11, 9) },
     };
 
-    private static List<PriceHistory> _priceHistories = new List<PriceHistory>
+    private List<PriceHistory> _priceHistories = new List<PriceHistory>
     {
         new PriceHistory { ProductId = 1, Price = 520.50m, Date = new DateOnly(2020, 5, 12) },
         new PriceHistory { ProductId = 1, Price = 495.25m, Date = new DateOnly(2020, 11, 8) },
@@ -349,13 +349,13 @@ public static class InMemoryDatabase
         new PriceHistory { ProductId = 50, Price = 219.99m, Date = new DateOnly(2024, 3, 6) },
         new PriceHistory { ProductId = 50, Price = 209.75m, Date = new DateOnly(2024, 7, 31) },
     };
-    public static IQueryable<Product> GetProducts() => _products.AsQueryable();
+    public IQueryable<Product> GetProducts() => _products.AsQueryable();
 
     /// <summary>
     /// Helper method that links the products and price histories together similar to entity framework
     /// </summary>
     /// <returns></returns>
-    public static IQueryable<Product> GetProductsWithHistories()
+    public IQueryable<Product> GetProductsWithHistories()
     {
         var products = _products.ToList();
         var priceHistories = _priceHistories.ToList();
@@ -369,10 +369,10 @@ public static class InMemoryDatabase
         return products.AsQueryable();
     }
 
-    public static Product? GetProductWithHistory(int productId) =>
+    public Product? GetProductWithHistory(int productId) =>
         GetProductsWithHistories().FirstOrDefault(p => p.Id == productId);
 
-    public static Product? UpdateProductPrice(int productId, decimal newPrice)
+    public Product? UpdateProductPrice(int productId, decimal newPrice)
     {
         var product = _products.FirstOrDefault(p => p.Id == productId);
         if(product == null) return null;
@@ -387,7 +387,7 @@ public static class InMemoryDatabase
     }
 
 
-    public static Product AddProduct(NewProduct product, int? customId = null)
+    public Product AddProduct(NewProduct product, int? customId = null)
     {
         var lastId = _products.OrderByDescending(p => p.Id).FirstOrDefault()?.Id ?? 0;
 

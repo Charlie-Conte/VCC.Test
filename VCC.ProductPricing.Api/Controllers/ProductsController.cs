@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using VCC.ProductPricing.Api.Database;
 using VCC.ProductPricing.Common.Api;
 using VCC.ProductPricing.Common.Models;
 
@@ -9,10 +10,12 @@ namespace VCC.ProductPricing.Api.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly IBusinessLogicHelper _businessLogicHelper;
+    private readonly IProductDatabase _productDatabase;
 
-    public ProductsController(IBusinessLogicHelper businessLogicHelper)
+    public ProductsController(IBusinessLogicHelper businessLogicHelper, IProductDatabase productDatabase)
     {
         _businessLogicHelper = businessLogicHelper;
+        _productDatabase = productDatabase;
     }
 
     /// <summary>
@@ -22,7 +25,7 @@ public class ProductsController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<Product>> GetAllProducts()
     {
-        var result = InMemoryDatabase.GetProducts().ToArray();
+        var result = _productDatabase.GetProducts().ToArray();
         if (result.Length == 0) return NotFound("Nothing in database");
         return result;
     }
@@ -35,7 +38,7 @@ public class ProductsController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<Product> GetProductWithHistory([FromRoute] int id)
     {
-        var result = InMemoryDatabase.GetProductWithHistory(id);
+        var result = _productDatabase.GetProductWithHistory(id);
         if (result == null) return NotFound($"Could not find product with id {id}");
         return result;
     }

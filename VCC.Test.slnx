@@ -2,5 +2,5 @@
   <Project Path="VCC.ProductPricing.Api.Tests/VCC.ProductPricing.Api.Tests.csproj" Id="722a68c1-6a84-447b-98c3-c4f863679eca" />
   <Project Path="VCC.ProductPricing.Api/VCC.ProductPricing.Api.csproj" Id="d150873f-67e4-498d-8e15-f5e1e2f9a866" />
   <Project Path="VCC.ProductPricing.Common/VCC.ProductPricing.Common.csproj" Id="5fbec0cb-1bda-4bad-818f-1152f70991e4" />
-  <Project Path="VCC.ProductPricing/VCC.ProductPricing.UI.csproj" />
+  <Project Path="VCC.ProductPricing.UI/VCC.ProductPricing.UI.csproj" />
 </Solution>
