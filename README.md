@@ -1,5 +1,7 @@
 ## Getting Started
-'Written in DotNet 10 and Visual Studio 2026'
+>[!NOTE]
+>Written in DotNet 10 and Visual Studio 2026
+
 To run the code you can either run it in debug within Visual Studio (or whichever IDE you prefer), or just compile it. All configurations are set up in the app settings to work out of the box, though you can override anything by tweaking the `appsettings.json` files manually. Default ports are set in the settings so cross-origin restrictions will be handled automatically. (Swagger UI and doc generation is only in debug)
 
 ---
