@@ -1,0 +1,58 @@
+﻿@using System.Text.Json
+@using VCC.ProductPricing.Common.Models
+@inject HttpClient HttpClient
+@inject IConfiguration Configuration
+@inject JsonSerializerOptions JsonOptions
+
+@* <MudSwitch @bind-Value="_overlayAutoClose" Label="Overlay Autoclose" Color="Color.Secondary" /> *@
+<MudDrawer @bind-Open="@_open" Anchor="Anchor.End" Style="@DrawerStyle" Elevation="1" Variant="@DrawerVariant.Temporary" OverlayAutoClose="false">
+    <MudDrawerHeader Class="d-flex justify-space-between ">
+        <MudText Typo="Typo.h6">Price History</MudText>
+        <MudButton OnClick="_ => _open = false">Close Drawer</MudButton>
+    </MudDrawerHeader>
+
+    <MudTimeline>
+        @{
+            if (_product?.PriceHistory != null)
+            {
+                int i = 1;
+                foreach (var priceTime in _product.PriceHistory.OrderByDescending(p=>p.Date))
+                {
+                    var col = i % 2 == 0 ? Color.Dark : Color.Primary;
+                    <MudTimelineItem Color="@col" Elevation="25" TimelineAlign="TimelineAlign.End">
+                        <ItemOpposite>
+                            <MudText Color="Color.Default" Typo="Typo.h6">@priceTime.Date</MudText>
+                        </ItemOpposite>
+                        <ItemContent>
+                            <MudPaper Elevation="0" Class="mt-n1">
+                                <MudText Color="@col" Typo="Typo.h6" GutterBottom="true">@priceTime.Price.ToString("C")</MudText>
+                                </MudPaper>
+                        </ItemContent>
+                    </MudTimelineItem>
+                    i++;
+                }
+            }
+        }
+
+    </MudTimeline>
+
+    
+
+</MudDrawer>
+@code {
+
+    private bool _open;
+    private string DrawerStyle => _open ? "width: 40vw;" : "width: 0vw;";
+
+    private Product? _product = null;
+
+    public async Task OpenDrawer(int productId)
+    {
+        _product = await HttpClient.GetFromJsonAsync<Product>($"{Configuration.GetValue<string>("ApiUri")}api/products/{productId}", JsonOptions);
+
+        _open = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+
+}

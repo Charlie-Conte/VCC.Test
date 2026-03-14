@@ -1,4 +1,6 @@
+using System.Text.Json;
 using MudBlazor.Services;
+using VCC.ProductPricing.Common.Json;
 using VCC.ProductPricing.UI.Components;
 
 namespace VCC.ProductPricing
@@ -9,14 +11,21 @@ namespace VCC.ProductPricing
         {
             var builder = WebApplication.CreateBuilder(args);
 
+
             // Add MudBlazor services
             builder.Services.AddMudServices();
 
             // Add services to the container.
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents();
+            builder.Services.AddScoped<HttpClient>();
 
-            var app = builder.Build();
+            JsonSerializerOptions jsonOptions = new JsonSerializerOptions();
+            jsonOptions.ApplyDefaultOptions();
+            builder.Services.AddSingleton(jsonOptions);
+
+
+        var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

@@ -8,7 +8,7 @@ namespace VCC.ProductPricing.Api.Controllers;
 [ApiController]
 public class ProductsController : ControllerBase
 {
-    private IBusinessLogicHelper _businessLogicHelper;
+    private readonly IBusinessLogicHelper _businessLogicHelper;
 
     public ProductsController(IBusinessLogicHelper businessLogicHelper)
     {
@@ -36,7 +36,7 @@ public class ProductsController : ControllerBase
     public ActionResult<Product> GetProductWithHistory([FromRoute] int id)
     {
         var result = InMemoryDatabase.GetProductWithHistory(id);
-        if (result == null) return NotFound("Id Not Found");
+        if (result == null) return NotFound($"Could not find product with id {id}");
         return result;
     }
 
@@ -52,8 +52,12 @@ public class ProductsController : ControllerBase
         var result = _businessLogicHelper.ApplyProductDiscount(id, request.DiscountPercentage);
         if (result.Item1 == null)
         {
-            if (!string.IsNullOrWhiteSpace(result.Item2)) return BadRequest(result.Item2);
-            return NotFound("Id Not Found");
+            if (!string.IsNullOrWhiteSpace(result.Item2))
+            {
+                ModelState.AddModelError(result.Item3, result.Item2);
+                return ValidationProblem(ModelState);
+            }
+            return NotFound($"Could not find product with id {id}");
         }
         return result.Item1;
     }
@@ -67,11 +71,15 @@ public class ProductsController : ControllerBase
     [HttpPut("{id}/update-price")]
     public ActionResult<UpdatePriceResponse> UpdateProductPrice([FromRoute] int id, [FromBody] UpdatePriceRequest request)
     {
-        var result = _businessLogicHelper.UpdatePriceResponse(id, request.NewPrice);
+        var result = _businessLogicHelper.UpdatePrice(id, request.NewPrice);
         if (result.Item1 == null)
         {
-            if (!string.IsNullOrWhiteSpace(result.Item2)) return BadRequest(result.Item2);
-            return NotFound("Id Not Found");
+            if (!string.IsNullOrWhiteSpace(result.Item2))
+            {
+                ModelState.AddModelError(result.Item3, result.Item2);
+                return ValidationProblem(ModelState);
+            }
+            return NotFound($"Could not find product with id {id}");
         }
         return result.Item1;
     }
