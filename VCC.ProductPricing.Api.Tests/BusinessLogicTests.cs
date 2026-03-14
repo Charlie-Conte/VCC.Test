@@ -59,7 +59,7 @@ public class BusinessLogicTests
     public void UpdatePrice_Success(decimal newPrice)
     {
         var startTime = DateTime.Now;
-        var result = BusinessLogicHelper.UpdatePriceResponse(999, newPrice);
+        var result = BusinessLogicHelper.UpdatePrice(999, newPrice);
 
         Assert.That(result.Item1, Is.Not.Null);
         Assert.That(result.Item1.NewPrice, Is.EqualTo(newPrice));
@@ -70,7 +70,7 @@ public class BusinessLogicTests
     [TestCase(0)]
     public void UpdatePrice_BadId(int id)
     {
-        var result = BusinessLogicHelper.UpdatePriceResponse(id, 10);
+        var result = BusinessLogicHelper.UpdatePrice(id, 10);
 
         Assert.That(result.Item1, Is.Null);
     }
@@ -82,7 +82,7 @@ public class BusinessLogicTests
     [TestCase(-90.90)]
     public void UpdatePrice_BadPrice(decimal newPrice)
     {
-        var result = BusinessLogicHelper.UpdatePriceResponse(999, newPrice);
+        var result = BusinessLogicHelper.UpdatePrice(999, newPrice);
 
         Assert.That(result.Item1, Is.Null);
         Assert.That(result.Item2, Is.Not.Null);

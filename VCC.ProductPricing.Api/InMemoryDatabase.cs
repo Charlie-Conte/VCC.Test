@@ -62,6 +62,12 @@ public static class InMemoryDatabase
     {
         new PriceHistory { ProductId = 1, Price = 320.00m, Date = new DateOnly(2024, 3, 5) },
         new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2024, 7, 18) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2024, 7, 20) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2024, 7, 19) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2024, 8, 17) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2024, 10, 14) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2025, 7, 2) },
+        new PriceHistory { ProductId = 1, Price = 295.00m, Date = new DateOnly(2025, 8, 12) },
         new PriceHistory { ProductId = 2, Price = 89.99m, Date = new DateOnly(2024, 2, 14) },
         new PriceHistory { ProductId = 3, Price = 175.00m, Date = new DateOnly(2024, 1, 9) },
         new PriceHistory { ProductId = 3, Price = 160.00m, Date = new DateOnly(2024, 6, 3) },
@@ -146,10 +152,12 @@ public static class InMemoryDatabase
         var product = _products.FirstOrDefault(p => p.Id == productId);
         if(product == null) return null;
 
+
+        _priceHistories.Add(new PriceHistory{ Date = DateOnly.FromDateTime(DateTime.Today), Price = product.Price, ProductId = productId});
+
         product.Price = newPrice;
         product.LastUpdated = DateTime.Now;
 
-        _priceHistories.Add(new PriceHistory{ Date = DateOnly.FromDateTime(DateTime.Today), Price = product.Price, ProductId = productId});
         return product;
     }
 
