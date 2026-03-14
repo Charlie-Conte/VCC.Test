@@ -1,20 +1,10 @@
 ﻿@page "/"
-@using System.Net.Http.Json
-@using System.Text.Json
-@using PriceHistoryDrawer = VCC.ProductPricing.UI.Components.Drawers.PriceHistoryDrawer
-@using VCC.ProductPricing.Common.Api
-@using VCC.ProductPricing.Common.Json
-@using VCC.ProductPricing.Common.Models
-@using VCC.ProductPricing.UI.Components.Drawers
-@inject HttpClient HttpClient
-@inject IConfiguration Configuration
-@inject JsonSerializerOptions JsonOptions
-
+@using System.Collections.ObjectModel
+@using MudBlazor.Utilities
 <PageTitle>Home</PageTitle>
 
 
-<MudDataGrid T="Product" MultiSelection="true" Items="@_items" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@QuickFilter"
-             Hideable="true">
+<MudDataGrid @ref="_grid" Bordered="true" Dense="true" T="Product" Items="@_items" SortMode="SortMode.Multiple" Filterable="true" QuickFilter="@QuickFilter">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Products</MudText>
         <MudSpacer />
@@ -25,11 +15,30 @@
         <PropertyColumn Property="x => x.Id" Title="#" Sortable="true" />
         <PropertyColumn Property="x => x.Name" />
         <PropertyColumn Property="x => x.LastUpdated" />
-        <PropertyColumn Property="x => x.Price" Format="C" />
-        <TemplateColumn CellClass="d-flex justify-between">
+        <TemplateColumn  ShowColumnOptions="true" Title="Price" Sortable="true" SortBy="@GetPriceSortSelector()">
             <CellTemplate>
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-                <MudIconButton Size="@Size.Small" Icon="@Icons.Material.Outlined.Timeline" OnClick="@(() => OpenTimeline(context.Item))" />
+                @if (_discountDict.TryGetValue(context.Item.Id, out var discount))
+                {
+                    <MudText Typo="Typo.body2" Style="text-decoration: line-through; color: grey;">
+                        @context.Item.Price.ToString("C")
+                    </MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Error">
+                        @discount.DiscountedPrice.ToString("C")
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">@context.Item.Price.ToString("C")</MudText>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Options" CellClass="d-flex justify-between">
+            <CellTemplate>
+                <MudButtonGroup OverrideStyles="false">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.Timeline" OnClick="@(() => OpenTimeline(context.Item))">Price History</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" EndIcon="@Icons.Material.Filled.Discount" OnClick="@(() => OpenDiscount(context.Item))">Discount</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Tertiary" EndIcon="@Icons.Material.Filled.PriceChange" OnClick="@(() => OpenNewPrice(context.Item))">Price Change</MudButton>
+                </MudButtonGroup>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
@@ -39,19 +48,55 @@
 </MudDataGrid>
 
 <PriceHistoryDrawer @ref="_historyDrawer"></PriceHistoryDrawer>
+<DiscountDialog @ref="_discountDialog" OnDiscountSubmitted="HandleDiscountResult"></DiscountDialog>
+<UpdatePriceDialog @ref="_updatePriceDialog" OnUpdatePriceSubmitted="HandleNewPriceResult"></UpdatePriceDialog>
 
 
 @code {
-    private IEnumerable<Product> _items = new List<Product>();
+    private ObservableCollection<Product> _items = new();
     private string _searchString = string.Empty;
-    private PriceHistoryDrawer _historyDrawer;
+    private PriceHistoryDrawer _historyDrawer = null!;
+    private DiscountDialog _discountDialog = null!;
+    private UpdatePriceDialog _updatePriceDialog = null!;
+    private MudDataGrid<Product> _grid = null!;
 
+    private readonly Dictionary<int, DiscountResponse> _discountDict = new();
 
-    private void OpenTimeline(Product product)
+    private async Task OpenTimeline(Product product)
     {
-        _historyDrawer.OpenDrawer(product.Id);
+        await _historyDrawer.OpenDrawer(product.Id);
     }
 
+    private void OpenDiscount(Product product)
+    {
+        _discountDialog.OpenDialog(product.Id);
+    }
+
+    private void HandleDiscountResult(DiscountResponse? result)
+    {
+        if (result is null) return;
+        if (!_discountDict.TryAdd(result.Id, result))
+            _discountDict[result.Id] = result;
+        StateHasChanged();
+    }
+
+    private void OpenNewPrice(Product product)
+    {
+        _updatePriceDialog.OpenDialog(product.Id);
+    }
+
+    private async Task HandleNewPriceResult(UpdatePriceResponse? result)
+    {
+        if (result is null) return;
+        _discountDict.Remove(result.Id);
+        _items = await HttpClient.GetFromJsonAsync<ObservableCollection<Product>>($"{Configuration.GetValue<string>("ApiUri")}api/products", JsonOptions) ?? new ObservableCollection<Product>();
+        StateHasChanged();
+    }
+
+    private Func<Product, object> GetPriceSortSelector() =>
+        x => _discountDict.TryGetValue(x.Id, out var discount)
+            ? discount.DiscountedPrice
+            : x.Price;
 
     // quick filter - filter globally across multiple columns with the same input
     private Func<Product, bool> QuickFilter => x =>
@@ -73,7 +118,6 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _items = await HttpClient.GetFromJsonAsync<List<Product>>($"{Configuration.GetValue<string>("ApiUri")}api/products", JsonOptions) ?? new List<Product>();
+        _items = await HttpClient.GetFromJsonAsync<ObservableCollection<Product>>($"{Configuration.GetValue<string>("ApiUri")}api/products", JsonOptions) ?? new ObservableCollection<Product>();
     }
-
 }

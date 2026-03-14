@@ -14,5 +14,4 @@
   <ItemGroup>
     <ProjectReference Include="..\VCC.ProductPricing.Common\VCC.ProductPricing.Common.csproj" />
   </ItemGroup>
-
 </Project>

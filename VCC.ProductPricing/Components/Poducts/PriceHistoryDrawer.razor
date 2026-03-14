@@ -1,24 +1,20 @@
-﻿@using System.Text.Json
-@using VCC.ProductPricing.Common.Models
-@inject HttpClient HttpClient
-@inject IConfiguration Configuration
-@inject JsonSerializerOptions JsonOptions
-
-@* <MudSwitch @bind-Value="_overlayAutoClose" Label="Overlay Autoclose" Color="Color.Secondary" /> *@
-<MudDrawer @bind-Open="@_open" Anchor="Anchor.End" Style="@DrawerStyle" Elevation="1" Variant="@DrawerVariant.Temporary" OverlayAutoClose="false">
+﻿<MudDrawer @bind-Open="@_open" Anchor="Anchor.End" Elevation="1" Variant="@DrawerVariant.Temporary" OverlayAutoClose="false">
     <MudDrawerHeader Class="d-flex justify-space-between ">
         <MudText Typo="Typo.h6">Price History</MudText>
-        <MudButton OnClick="_ => _open = false">Close Drawer</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="_ => _open = false">Close Drawer</MudButton>
     </MudDrawerHeader>
 
-    <MudTimeline>
-        @{
-            if (_product?.PriceHistory != null)
+    @if (_product != null)
+    {
+        <MudText Typo="Typo.h6" Style="margin-bottom: 4vh;" Align="Align.Center">@_product.Name</MudText>
+        <MudTimeline>
+
+            @if (_product.PriceHistory != null)
             {
                 int i = 1;
-                foreach (var priceTime in _product.PriceHistory.OrderByDescending(p=>p.Date))
+                foreach (var priceTime in _product.PriceHistory.OrderByDescending(p => p.Date))
                 {
-                    var col = i % 2 == 0 ? Color.Dark : Color.Primary;
+                    var col = i % 2 == 0 ? Color.Tertiary : Color.Primary;
                     <MudTimelineItem Color="@col" Elevation="25" TimelineAlign="TimelineAlign.End">
                         <ItemOpposite>
                             <MudText Color="Color.Default" Typo="Typo.h6">@priceTime.Date</MudText>
@@ -30,19 +26,14 @@
                     i++;
                 }
             }
-        }
-
-    </MudTimeline>
-
-    
-
+        </MudTimeline>
+    }
 </MudDrawer>
 @code {
 
     private bool _open;
-    private string DrawerStyle => _open ? "width: 40vw;" : "width: 0vw;";
 
-    private Product? _product = null;
+    private Product? _product;
 
     public async Task OpenDrawer(int productId)
     {
@@ -51,6 +42,4 @@
         _open = true;
         await InvokeAsync(StateHasChanged);
     }
-
-
 }

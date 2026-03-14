@@ -1,0 +1,46 @@
+﻿<MudDialog @bind-Visible="_visible" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.PriceChange" Class="mr-3"/> Update Price
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudNumericField Required="true" Format="C2" Label="New Price" AutoFocus="true" HelperText="Non negative value" T="decimal" @bind-Value="_updatePriceInput" Class="mt-3" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitUpdatePrice" Class="px-10">Submit</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Parameter] public EventCallback<UpdatePriceResponse?> OnUpdatePriceSubmitted { get; set; }
+
+    private bool _visible;
+    private decimal _updatePriceInput;
+    private int _productId;
+    private readonly DialogOptions _dialogOptions = new() { FullWidth = true, CloseButton = true};
+
+    public void OpenDialog(int productId)
+    {
+        _updatePriceInput = 0m;
+        _productId = productId;
+        _visible = true;
+        StateHasChanged();
+    }
+    
+    private async Task SubmitUpdatePrice()
+    {
+        var response = await HttpClient.PutAsJsonAsync($"{Configuration.GetValue<string>("ApiUri")}api/products/{_productId}/update-price", new UpdatePriceRequest() { NewPrice = _updatePriceInput}, JsonOptions);
+        string responseContent = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            VccSnackbarService.ShowError(responseContent, response.ReasonPhrase);
+            return;
+        }
+
+        _visible = false;
+
+        var result = JsonSerializer.Deserialize<UpdatePriceResponse>(responseContent, JsonOptions);
+        await OnUpdatePriceSubmitted.InvokeAsync(result);
+    }
+}

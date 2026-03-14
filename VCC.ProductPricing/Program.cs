@@ -1,5 +1,7 @@
-using System.Text.Json;
 using MudBlazor.Services;
+using System.Globalization;
+using System.Text.Json;
+using VCC.ProductPricing.Common;
 using VCC.ProductPricing.Common.Json;
 using VCC.ProductPricing.UI.Components;
 
@@ -24,8 +26,22 @@ namespace VCC.ProductPricing
             jsonOptions.ApplyDefaultOptions();
             builder.Services.AddSingleton(jsonOptions);
 
+            builder.Services.AddScoped<VccSnackbarService>();
 
-        var app = builder.Build();
+            builder.AddSerilog();
+
+
+            var app = builder.Build();
+
+
+            var cultureInfo = new CultureInfo("en-GB");
+
+            // the NumberFormat can now also be customized...
+            // ...
+
+            // set global CultureInfo 
+            CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+            CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
